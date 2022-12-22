@@ -61,7 +61,7 @@ try:
                     # Se a resposta foi bem-sucedida, obter o conteúdo da resposta
                     content = response.content
 
-                    tk.messagebox.showinfo("Sucesso!", "Uma nova versão do aplicativo foi instalada com sucesso!")
+                    tk.messagebox.showinfo("Sucesso!!!", "Uma nova versão do aplicativo foi instalada com sucesso!")
                     sys.exit()
 
                 else:
