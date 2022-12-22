@@ -18,7 +18,7 @@ nome_do_programa = "mac"
 urlVersao = 'https://raw.githubusercontent.com/kdumr/Formatador-de-Mac/main/versionapp.json'
 
 # URL do arquivo a ser baixado
-urlDownload = 'https://github.com/kdumr/Formatador-de-Mac/raw/main/mac.exe'
+urlDownload = 'https://github.com/kdumr/Formatador-de-Mac/raw/main/dist/mac.exe'
 
 # Criar a janela principal
 root = tk.Tk()
