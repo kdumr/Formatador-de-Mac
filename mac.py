@@ -111,11 +111,11 @@ while continuar:
     numIn = input("Digite o mac:\n-> ")
     if numIn == "0":
         os.system('cls') or None
-        print("============================================")
+        print("===================================================")
         print("Use a tecla END para colar o mac no Flashman")
         print("")
         print("Use a tecla DELETE para continuar digitando os macs")
-        print("============================================\n")
+        print("===================================================\n")
         with Listener(on_press=show) as listener:
             listener.join()
     elif numIn == "1":
