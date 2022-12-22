@@ -3,6 +3,7 @@ import pyautogui
 import pyperclip
 import time
 import os
+import sys
 import requests
 import tkinter as tk
 import ctypes
@@ -10,7 +11,7 @@ from prettytable import PrettyTable
 from tkinter import messagebox, filedialog
 from pynput.keyboard import Key, Listener
 
-version = 2.0
+version = 2.1
 nome_do_programa = "mac"
 
 # URL da página que contém informações sobre a versão mais recente
@@ -50,7 +51,7 @@ try:
 
                 file_path = filedialog.askdirectory()
 
-                open(file_path + f'/{nome_do_programa}.exe', 'wb').write(r.content)
+                open(file_path + f'/{nome_do_programa} {version}.exe', 'wb').write(r.content)
 
                 # Realizar a solicitação HTTP
                 response = requests.get(urlDownload)
@@ -61,7 +62,7 @@ try:
                     content = response.content
 
                     tk.messagebox.showinfo("Sucesso!", "Uma nova versão do aplicativo foi instalada com sucesso!")
-                    exit()
+                    sys.exit()
 
                 else:
                     print('Erro ao baixar o arquivo:', response.status_code)
