@@ -11,7 +11,7 @@ from prettytable import PrettyTable
 from tkinter import messagebox, filedialog
 from pynput.keyboard import Key, Listener
 
-version = 2.1
+version = 2.2
 nome_do_programa = "mac"
 
 # URL da página que contém informações sobre a versão mais recente
