@@ -23,6 +23,7 @@ urlDownload = 'https://raw.githubusercontent.com/kdumr/Formatador-de-Mac/main/di
 # Criar a janela principal
 root = tk.Tk()
 root.withdraw()
+root.iconbitmap("icone.ico")
 
 table = PrettyTable()
 
