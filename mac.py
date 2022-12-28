@@ -13,7 +13,7 @@ from prettytable import PrettyTable
 from tkinter import messagebox, filedialog
 from pynput.keyboard import Key, Listener
 
-version = 2.3
+version = 2.4
 nome_do_programa = "mac"
 
 # URL da página que contém informações sobre a versão mais recente
@@ -57,22 +57,26 @@ class Main:
                         r = requests.get(urlDownload)
 
                         file_path = filedialog.askdirectory()
-
-                        open(file_path + f'/{nome_do_programa} {version}.exe', 'wb').write(r.content)
-
-                        # Realizar a solicitação HTTP
-                        response = requests.get(urlDownload)
-
-                        # Verificar o código de status da resposta
-                        if response.status_code == 200:
-                            # Se a resposta foi bem sucedida, obter o conteúdo da resposta
-                            content = response.content
-
-                            tk.messagebox.showinfo("Sucesso!!!", "Uma nova versão do aplicativo foi instalada com sucesso!")
+                        if file_path == "":
+                            tk.messagebox.showerror("Erro!", "Você cancelou a instalação da nova versão do aplicativo!")
                             sys.exit()
-
                         else:
-                            print('Erro ao baixar o arquivo:', response.status_code)
+
+                            open(file_path + f'/{nome_do_programa} {content}.exe', 'wb').write(r.content)
+
+                            # Realizar a solicitação HTTP
+                            response = requests.get(urlDownload)
+
+                            # Verificar o código de status da resposta
+                            if response.status_code == 200:
+                                # Se a resposta foi bem sucedida, obter o conteúdo da resposta
+                                content = response.content
+
+                                tk.messagebox.showinfo("Sucesso!!!", "Uma nova versão do aplicativo foi instalada com sucesso!")
+                                sys.exit()
+
+                            else:
+                                print('Erro ao baixar o arquivo:', response.status_code)
                     else:
                         table.field_names = ["ATENÇÃO!"]
                         table.add_row(["Você está usando uma versão antiga do aplicativo!"])
