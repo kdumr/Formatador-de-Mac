@@ -4,17 +4,22 @@ import pyperclip
 import time
 import os
 import sys
-import requests
 import tkinter as tk
 import ctypes
 import datetime
 import traceback
+import pyfiglet
+import colorama
 from prettytable import PrettyTable
-from tkinter import messagebox, filedialog
 from pynput.keyboard import Key, Listener
+from conection import *
 
-version = 2.4
+version = 2.5
 nome_do_programa = "mac"
+
+colorama.init(autoreset=True)
+colorTexto = colorama.Fore
+colorStyle = colorama.Style
 
 # URL da página que contém informações sobre a versão mais recente
 urlVersao = 'https://raw.githubusercontent.com/kdumr/Formatador-de-Mac/main/versionapp.json'
@@ -34,68 +39,14 @@ ctypes.windll.kernel32.SetConsoleTitleW("Formatador de MAC")
 
 # Verificar versão
 class Main:
-    def main():        
-        try:
-            # Realizar a solicitação HTTP
-            response = requests.get(urlVersao)
-            # Verificar o código de status da resposta
-            if response.status_code == 200:
-                # Se a resposta foi bem-sucedida, obter o conteúdo da resposta
-                content = response.json()
-
-                # Obter a versão mais recente do conteúdo
-                latest_version = version
-
-                # Comparar a versão mais recente com a versão atualmente instalada
-                if latest_version < content:
-                    result = messagebox.askyesno(f"Versão atual: {version}", f"Uma nova versão está disponível: {content} \nDeseja instalar?")
-
-                    # Verificar o resultado
-                    if result:
-                        print("Selecione o local que deseja instalar a nova versão...")
-
-                        r = requests.get(urlDownload)
-
-                        file_path = filedialog.askdirectory()
-                        if file_path == "":
-                            tk.messagebox.showerror("Erro!", "Você cancelou a instalação da nova versão do aplicativo!")
-                            sys.exit()
-                        else:
-
-                            open(file_path + f'/{nome_do_programa} {content}.exe', 'wb').write(r.content)
-
-                            # Realizar a solicitação HTTP
-                            response = requests.get(urlDownload)
-
-                            # Verificar o código de status da resposta
-                            if response.status_code == 200:
-                                # Se a resposta foi bem sucedida, obter o conteúdo da resposta
-                                content = response.content
-
-                                tk.messagebox.showinfo("Sucesso!!!", "Uma nova versão do aplicativo foi instalada com sucesso!")
-                                sys.exit()
-
-                            else:
-                                print('Erro ao baixar o arquivo:', response.status_code)
-                    else:
-                        table.field_names = ["ATENÇÃO!"]
-                        table.add_row(["Você está usando uma versão antiga do aplicativo!"])
-                        print(table)
-                else:
-                    print('-> Você está usando a versão mais recente:', version)
-            else:
-                print('Erro ao verificar a versão mais recente:', response.status_code)
-        except requests.exceptions.ConnectionError:
-            print("-> Não foi possível verificar novas versões do aplicativo, parece que você está sem conexão.")
-
+    def main():
+        conectar(urlVersao, urlDownload, version, nome_do_programa)
         lista = []
         continuar = True
 
-        def inicio():
-            print("============================================")
-            print("Use a tecla DELETE para parar o programa")
-            print("Use a tecla END para colar o mac no Flashman")
-            print("============================================\n")
+        def titulo():
+            print("")
+            print(pyfiglet.figlet_format("Solutec"))
 
         def show(key):
             if key == Key.end:
@@ -103,21 +54,22 @@ class Main:
                     pyperclip.copy(lista[i])
                     pyautogui.hotkey('ctrl', 'v')
                     pyautogui.hotkey('enter')
-                    time.sleep(1)
+                    time.sleep(0.5)
                 print('OS MACS FORAM COLADOS')
                 return False
             if key == Key.delete:
                 return False
 
-        inicio()
         while continuar:
-            print("Digite '0' para ir para a próxima etapa:")
-            print("Digite '1' para APAGAR os macs:")
-            print("Digite '2' para APAGAR o último mac:")
-            print(f"MACS Registrados: {len(lista)}")
+            titulo()
+            print(f"Digite '{colorStyle.BRIGHT}0{colorTexto.RESET}' para {colorTexto.GREEN}SEGUIR{colorTexto.RESET} para a próxima etapa:")
+            print(f"Digite '{colorStyle.BRIGHT}1{colorTexto.RESET}' para {colorTexto.RED}DELETAR{colorTexto.RESET} os macs:")
+            print(f"Digite '{colorStyle.BRIGHT}2{colorTexto.RESET}' para {colorTexto.LIGHTRED_EX}APAGAR{colorTexto.RESET} o último mac:")
+            print(f"MACS Registrados: {colorTexto.CYAN}{len(lista)}{colorTexto.RESET}")
             numIn = input("Digite o mac:\n-> ")
             if numIn == "0":
                 os.system('cls') or None
+                titulo()
                 print("===================================================")
                 print("Use a tecla END para colar o mac no Flashman")
                 print("")
@@ -128,27 +80,24 @@ class Main:
             elif numIn == "1":
                 os.system('cls') or None
                 print("================================")
-                print("OS MACS FORAM APAGADOS DA LISTA")
+                print(f"OS MACS FORAM {colorTexto.RED}APAGADOS{colorTexto.RESET} DA LISTA")
                 print("================================")
-                inicio()
                 lista.clear()
             elif numIn == "2":
                 if lista == []:
                     print("====================================")
-                    print("ERRO: NÃO EXISTE NENHUM MAC NA LISTA")
+                    print(f"{colorTexto.RED}ERRO:{colorTexto.RESET} NÃO EXISTE NENHUM MAC NA LISTA")
                     print("====================================")
                 else:
                     os.system('cls') or None
-                    print("================================")
-                    print("O ÚLTIMO MAC FOI APAGADO DA LISTA")
-                    print("================================")
-                    inicio()
+                    print("=================================")
+                    print(f"O ÚLTIMO MAC FOI {colorTexto.RED}APAGADO{colorTexto.RESET} DA LISTA")
+                    print("=================================")
                     lista.pop()
             elif numIn == "":
                 print("=================================")
                 print("ERRO: VOCÊ PRECISA DIGITAR UM MAC")
                 print("=================================")
-                inicio()
             else:
                 mac = '{}:{}:{}:{}:{}:{}'.format(numIn[:2], numIn[2:4], numIn[4:6], numIn[6:8], numIn[8:10], numIn[10:])
                 print(f"MAC: {mac}\n")
