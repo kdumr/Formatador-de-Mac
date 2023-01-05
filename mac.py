@@ -8,7 +8,6 @@ import tkinter as tk
 import ctypes
 import datetime
 import traceback
-import pyfiglet
 import colorama
 from prettytable import PrettyTable
 from pynput.keyboard import Key, Listener
@@ -44,10 +43,6 @@ class Main:
         lista = []
         continuar = True
 
-        def titulo():
-            print("")
-            print(pyfiglet.figlet_format("Solutec"))
-
         def show(key):
             if key == Key.end:
                 for i in range(len(lista)):
@@ -61,7 +56,6 @@ class Main:
                 return False
 
         while continuar:
-            titulo()
             print(f"Digite '{colorStyle.BRIGHT}0{colorTexto.RESET}' para {colorTexto.GREEN}SEGUIR{colorTexto.RESET} para a próxima etapa:")
             print(f"Digite '{colorStyle.BRIGHT}1{colorTexto.RESET}' para {colorTexto.RED}DELETAR{colorTexto.RESET} os macs:")
             print(f"Digite '{colorStyle.BRIGHT}2{colorTexto.RESET}' para {colorTexto.LIGHTRED_EX}APAGAR{colorTexto.RESET} o último mac:")
@@ -69,7 +63,6 @@ class Main:
             numIn = input("Digite o mac:\n-> ")
             if numIn == "0":
                 os.system('cls') or None
-                titulo()
                 print("===================================================")
                 print("Use a tecla END para colar o mac no Flashman")
                 print("")
