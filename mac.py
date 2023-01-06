@@ -9,11 +9,19 @@ import ctypes
 import datetime
 import traceback
 import colorama
+import json
 from prettytable import PrettyTable
 from pynput.keyboard import Key, Listener
 from conection import *
 
-version = 2.5
+titulo = """
+ ____        _       _
+/ ___|  ___ | |_   _| |_ ___  ___ 
+\___ \ / _ \| | | | | __/ _ \/ __|
+ ___) | (_) | | |_| | ||  __/ (__ 
+|____/ \___/|_|\__,_|\__\___|\___|
+"""
+version = 2.6
 nome_do_programa = "mac"
 
 colorama.init(autoreset=True)
@@ -36,10 +44,11 @@ table = PrettyTable()
 # Modifica o nome do CMD
 ctypes.windll.kernel32.SetConsoleTitleW("Formatador de MAC")
 
-# Verificar versão
 class Main:
     def main():
+        # Verifica a versão do aplciativo
         conectar(urlVersao, urlDownload, version, nome_do_programa)
+
         lista = []
         continuar = True
 
@@ -50,19 +59,26 @@ class Main:
                     pyautogui.hotkey('ctrl', 'v')
                     pyautogui.hotkey('enter')
                     time.sleep(0.5)
-                print('OS MACS FORAM COLADOS')
+                os.system('cls') or None
+                print(titulo)
+                print(colorTexto.LIGHTGREEN_EX + "=====================")
+                print(colorTexto.LIGHTGREEN_EX + "OS MACS FORAM COLADOS")
+                print(colorTexto.LIGHTGREEN_EX + "=====================" + colorTexto.RESET)
+                print("")
                 return False
             if key == Key.delete:
                 return False
 
+        print(titulo)
         while continuar:
-            print(f"Digite '{colorStyle.BRIGHT}0{colorTexto.RESET}' para {colorTexto.GREEN}SEGUIR{colorTexto.RESET} para a próxima etapa:")
-            print(f"Digite '{colorStyle.BRIGHT}1{colorTexto.RESET}' para {colorTexto.RED}DELETAR{colorTexto.RESET} os macs:")
-            print(f"Digite '{colorStyle.BRIGHT}2{colorTexto.RESET}' para {colorTexto.LIGHTRED_EX}APAGAR{colorTexto.RESET} o último mac:")
+            print(f"Digite '{colorStyle.BRIGHT}0{colorStyle.NORMAL}' para {colorTexto.GREEN}SEGUIR{colorTexto.RESET} para a próxima etapa:")
+            print(f"Digite '{colorStyle.BRIGHT}1{colorStyle.NORMAL}' para {colorTexto.RED}DELETAR{colorTexto.RESET} os macs:")
+            print(f"Digite '{colorStyle.BRIGHT}2{colorStyle.NORMAL}' para {colorTexto.LIGHTRED_EX}APAGAR{colorTexto.RESET} o último mac:")
             print(f"MACS Registrados: {colorTexto.CYAN}{len(lista)}{colorTexto.RESET}")
             numIn = input("Digite o mac:\n-> ")
             if numIn == "0":
                 os.system('cls') or None
+                print(titulo)
                 print("===================================================")
                 print("Use a tecla END para colar o mac no Flashman")
                 print("")
@@ -72,8 +88,9 @@ class Main:
                     listener.join()
             elif numIn == "1":
                 os.system('cls') or None
+                print(titulo)
                 print("================================")
-                print(f"OS MACS FORAM {colorTexto.RED}APAGADOS{colorTexto.RESET} DA LISTA")
+                print(f"OS MACS FORAM {colorTexto.RED}DELETADOS{colorTexto.RESET} DA LISTA")
                 print("================================")
                 lista.clear()
             elif numIn == "2":
@@ -82,15 +99,15 @@ class Main:
                     print(f"{colorTexto.RED}ERRO:{colorTexto.RESET} NÃO EXISTE NENHUM MAC NA LISTA")
                     print("====================================")
                 else:
-                    os.system('cls') or None
+                    print("")
                     print("=================================")
-                    print(f"O ÚLTIMO MAC FOI {colorTexto.RED}APAGADO{colorTexto.RESET} DA LISTA")
+                    print(f"O ÚLTIMO MAC FOI {colorTexto.LIGHTRED_EX}APAGADO{colorTexto.RESET} DA LISTA")
                     print("=================================")
                     lista.pop()
             elif numIn == "":
-                print("=================================")
-                print("ERRO: VOCÊ PRECISA DIGITAR UM MAC")
-                print("=================================")
+                print(colorTexto.RED + "=================================")
+                print(colorTexto.RED + "ERRO: VOCÊ PRECISA DIGITAR UM MAC")
+                print(colorTexto.RED + "=================================")
             else:
                 mac = '{}:{}:{}:{}:{}:{}'.format(numIn[:2], numIn[2:4], numIn[4:6], numIn[6:8], numIn[8:10], numIn[10:])
                 print(f"MAC: {mac}\n")
