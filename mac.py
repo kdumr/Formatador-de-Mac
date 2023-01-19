@@ -9,10 +9,11 @@ import ctypes
 import datetime
 import traceback
 import colorama
-import json
 from prettytable import PrettyTable
 from pynput.keyboard import Key, Listener
 from conection import *
+from threading import Thread
+
 
 titulo = """
  ____        _       _
@@ -21,7 +22,7 @@ titulo = """
  ___) | (_) | | |_| | ||  __/ (__ 
 |____/ \___/|_|\__,_|\__\___|\___|
 """
-version = 2.6
+version = 2.7
 nome_do_programa = "mac"
 
 colorama.init(autoreset=True)
@@ -44,14 +45,31 @@ table = PrettyTable()
 # Modifica o nome do CMD
 ctypes.windll.kernel32.SetConsoleTitleW("Formatador de MAC")
 
+class Timer:
+    def __init__(self, start_time):
+        self.start_time = start_time
+
+    def get_elapsed_time(self):
+        current_time = time.time()
+        elapsed_time = int(current_time - self.start_time)
+        hours, remainder = divmod(elapsed_time, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return "{:02}:{:02}:{:02}".format(hours, minutes, seconds)
+    
+    def print_elapsed_time(self):
+        while True:
+            print("\rTempo de execução:", self.get_elapsed_time(), end="")
+            time.sleep(1)
+
 class Main:
     def main():
+        tempoAtual = time.time()
         # Verifica a versão do aplciativo
         conectar(urlVersao, urlDownload, version, nome_do_programa)
 
         lista = []
         continuar = True
-
+                
         def show(key):
             if key == Key.end:
                 for i in range(len(lista)):
@@ -104,6 +122,15 @@ class Main:
                     print(f"O ÚLTIMO MAC FOI {colorTexto.LIGHTRED_EX}APAGADO{colorTexto.RESET} DA LISTA")
                     print("=================================")
                     lista.pop()
+            elif numIn == "info":
+                os.system('cls') or None
+                print("Informações do aplicativo:")
+                print("\n")
+                print(f"Versão: {version}")
+                print("\n")
+                timer = Timer(tempoAtual)
+                timer.print_elapsed_time()
+
             elif numIn == "":
                 print(colorTexto.RED + "=================================")
                 print(colorTexto.RED + "ERRO: VOCÊ PRECISA DIGITAR UM MAC")
