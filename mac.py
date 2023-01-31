@@ -40,7 +40,6 @@ urlDownload = 'https://raw.githubusercontent.com/kdumr/Formatador-de-Mac/main/di
 root = tk.Tk()
 root.withdraw()
 
-
 table = PrettyTable()
 
 # Modifica o nome do CMD
@@ -63,6 +62,7 @@ class Main:
             for linha in linhas:
                 print(cor + "| " + linha.ljust(tamanho) + " |")
             print(cor + linha_superior + colorTexto.RESET)
+
 
         def show(key):
             if key == Key.end:
@@ -106,6 +106,7 @@ class Main:
                 else:
                     caixaTexto("O ÚLTIMO MAC FOI APAGADO DA LISTA", colorTexto.LIGHTRED_EX, "=")
                     lista.pop()
+
             elif numIn == "3":
                 if lista == []:
                     caixaTexto("ERRO: NÃO EXISTE NENHUM MAC NA LISTA", colorTexto.RED, "=")
@@ -115,12 +116,14 @@ class Main:
                     caixaTexto((" " * 10 + "LISTA DE MAC'S COPIADOS" + " " * 10), colorTexto.MAGENTA)
                     for item in lista:
                         print(colorTexto.MAGENTA + item + "\n")
+
             elif numIn == "info":
                 os.system('cls') or None
                 print("Informações do aplicativo:")
                 print("\n")
                 print(f"Versão: {version}")
                 print("\n")
+
             else:
                 mac = '{}:{}:{}:{}:{}:{}'.format(numIn[:2], numIn[2:4], numIn[4:6], numIn[6:8], numIn[8:10], numIn[10:])
                 caixaTexto(f"MAC: {mac}")
