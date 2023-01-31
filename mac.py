@@ -14,20 +14,21 @@ from pynput.keyboard import Key, Listener
 from conection import *
 from threading import Thread
 
+# Cria variável para cores
+colorama.init(autoreset=True)
+colorTexto = colorama.Fore
+colorStyle = colorama.Style
 
-titulo = """
+titulo = f"""{colorTexto.YELLOW}
  ____        _       _
 / ___|  ___ | |_   _| |_ ___  ___ 
 \___ \ / _ \| | | | | __/ _ \/ __|
  ___) | (_) | | |_| | ||  __/ (__ 
 |____/ \___/|_|\__,_|\__\___|\___|
+{colorTexto.RESET}
 """
 version = 2.7
 nome_do_programa = "mac"
-
-colorama.init(autoreset=True)
-colorTexto = colorama.Fore
-colorStyle = colorama.Style
 
 # URL da página que contém informações sobre a versão mais recente
 urlVersao = 'https://raw.githubusercontent.com/kdumr/Formatador-de-Mac/main/versionapp.json'
@@ -45,22 +46,6 @@ table = PrettyTable()
 # Modifica o nome do CMD
 ctypes.windll.kernel32.SetConsoleTitleW("Formatador de MAC")
 
-class Timer:
-    def __init__(self, start_time):
-        self.start_time = start_time
-
-    def get_elapsed_time(self):
-        current_time = time.time()
-        elapsed_time = int(current_time - self.start_time)
-        hours, remainder = divmod(elapsed_time, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        return "{:02}:{:02}:{:02}".format(hours, minutes, seconds)
-    
-    def print_elapsed_time(self):
-        while True:
-            print("\rTempo de execução:", self.get_elapsed_time(), end="")
-            time.sleep(1)
-
 class Main:
     def main():
         tempoAtual = time.time()
@@ -69,19 +54,26 @@ class Main:
 
         lista = []
         continuar = True
-                
+
+        def caixaTexto(texto, cor = colorTexto.WHITE, tipoLinha = "-"):
+            linhas = texto.splitlines()
+            tamanho = max([len(linha) for linha in linhas])
+            linha_superior = tipoLinha * (tamanho + 4)
+            print(cor + linha_superior)
+            for linha in linhas:
+                print(cor + "| " + linha.ljust(tamanho) + " |")
+            print(cor + linha_superior + colorTexto.RESET)
+
         def show(key):
             if key == Key.end:
                 for i in range(len(lista)):
                     pyperclip.copy(lista[i])
+                    time.sleep(0.5)
                     pyautogui.hotkey('ctrl', 'v')
                     pyautogui.hotkey('enter')
-                    time.sleep(0.5)
                 os.system('cls') or None
                 print(titulo)
-                print(colorTexto.LIGHTGREEN_EX + "=====================")
-                print(colorTexto.LIGHTGREEN_EX + "OS MACS FORAM COLADOS")
-                print(colorTexto.LIGHTGREEN_EX + "=====================" + colorTexto.RESET)
+                caixaTexto((" " * 10 + "OS MACS FORAM COLADOS" + " " * 10), colorTexto.GREEN)
                 print("")
                 return False
             if key == Key.delete:
@@ -89,55 +81,50 @@ class Main:
 
         print(titulo)
         while continuar:
-            print(f"Digite '{colorStyle.BRIGHT}0{colorStyle.NORMAL}' para {colorTexto.GREEN}SEGUIR{colorTexto.RESET} para a próxima etapa:")
-            print(f"Digite '{colorStyle.BRIGHT}1{colorStyle.NORMAL}' para {colorTexto.RED}DELETAR{colorTexto.RESET} os macs:")
-            print(f"Digite '{colorStyle.BRIGHT}2{colorStyle.NORMAL}' para {colorTexto.LIGHTRED_EX}APAGAR{colorTexto.RESET} o último mac:")
-            print(f"MACS Registrados: {colorTexto.CYAN}{len(lista)}{colorTexto.RESET}")
-            numIn = input("Digite o mac:\n-> ")
-            if numIn == "0":
+            print(f"|Digite [{colorStyle.BRIGHT}0{colorStyle.NORMAL}] para {colorTexto.GREEN}SEGUIR{colorTexto.RESET} para a próxima etapa:")
+            print(f"|Digite [{colorStyle.BRIGHT}1{colorStyle.NORMAL}] para {colorTexto.RED}DELETAR{colorTexto.RESET} os mac's:")
+            print(f"|Digite [{colorStyle.BRIGHT}2{colorStyle.NORMAL}] para {colorTexto.LIGHTRED_EX}APAGAR{colorTexto.RESET} o último mac:")
+            print(f"|Digite [{colorStyle.BRIGHT}3{colorStyle.NORMAL}] para {colorTexto.MAGENTA}LISTAR{colorTexto.RESET} os mac's copiados:")
+            print(f"|MACS Registrados: {colorTexto.CYAN}{len(lista)}{colorTexto.RESET}")
+            numIn = input("|Digite o mac:\n-> ")
+            if numIn == "":
+                caixaTexto("ERRO: Você precisa digitar um MAC.", colorTexto.RED, "=")
+            elif numIn == "0":
                 os.system('cls') or None
                 print(titulo)
-                print("===================================================")
-                print("Use a tecla END para colar o mac no Flashman")
-                print("")
-                print("Use a tecla DELETE para continuar digitando os macs")
-                print("===================================================\n")
+                caixaTexto("Use a tecla [END] para colar o mac no Flashman\n\nUse a tecla [DELETE] para continuar digitando os macs")
                 with Listener(on_press=show) as listener:
                     listener.join()
             elif numIn == "1":
                 os.system('cls') or None
                 print(titulo)
-                print("================================")
-                print(f"OS MACS FORAM {colorTexto.RED}DELETADOS{colorTexto.RESET} DA LISTA")
-                print("================================")
+                caixaTexto("OS MACS FORAM DELETADOS DA LISTA", colorTexto.RED, "=")
                 lista.clear()
             elif numIn == "2":
                 if lista == []:
-                    print("====================================")
-                    print(f"{colorTexto.RED}ERRO:{colorTexto.RESET} NÃO EXISTE NENHUM MAC NA LISTA")
-                    print("====================================")
+                    caixaTexto("ERRO: NÃO EXISTE NENHUM MAC NA LISTA", colorTexto.RED, "=")
                 else:
-                    print("")
-                    print("=================================")
-                    print(f"O ÚLTIMO MAC FOI {colorTexto.LIGHTRED_EX}APAGADO{colorTexto.RESET} DA LISTA")
-                    print("=================================")
+                    caixaTexto("O ÚLTIMO MAC FOI APAGADO DA LISTA", colorTexto.LIGHTRED_EX, "=")
                     lista.pop()
+            elif numIn == "3":
+                if lista == []:
+                    caixaTexto("ERRO: NÃO EXISTE NENHUM MAC NA LISTA", colorTexto.RED, "=")
+                else:
+                    os.system('cls') or None
+                    print(titulo)
+                    caixaTexto((" " * 10 + "LISTA DE MAC'S COPIADOS" + " " * 10), colorTexto.MAGENTA)
+                    for item in lista:
+                        print(colorTexto.MAGENTA + item + "\n")
             elif numIn == "info":
                 os.system('cls') or None
                 print("Informações do aplicativo:")
                 print("\n")
                 print(f"Versão: {version}")
                 print("\n")
-                timer = Timer(tempoAtual)
-                timer.print_elapsed_time()
-
-            elif numIn == "":
-                print(colorTexto.RED + "=================================")
-                print(colorTexto.RED + "ERRO: VOCÊ PRECISA DIGITAR UM MAC")
-                print(colorTexto.RED + "=================================")
             else:
                 mac = '{}:{}:{}:{}:{}:{}'.format(numIn[:2], numIn[2:4], numIn[4:6], numIn[6:8], numIn[8:10], numIn[10:])
-                print(f"MAC: {mac}\n")
+                caixaTexto(f"MAC: {mac}")
+                print("")
                 lista.append(mac)
 
 if __name__ == "__main__":
