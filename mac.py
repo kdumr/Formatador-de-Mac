@@ -28,7 +28,7 @@ titulo = f"""{colorTexto.YELLOW}
 |____/ \___/|_|\__,_|\__\___|\___|
 {colorTexto.RESET}
 """
-version = 2.7
+version = 2.8
 nome_do_programa = "mac"
 
 # URL da página que contém informações sobre a versão mais recente
@@ -81,7 +81,7 @@ class Main:
                 print(titulo)
                 caixaTexto((" " * 10 + "OS MACS FORAM COLADOS" + " " * 10), colorTexto.GREEN)
                 print("")
-                
+
                 # Desbloquear Mouse
                 mouse_listener.stop()
                 pyautogui.moveTo(original_position)
