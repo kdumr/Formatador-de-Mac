@@ -29,7 +29,7 @@ titulo = f"""{colorTexto.YELLOW}
 |____/ \___/|_|\__,_|\__\___|\___|
 {colorTexto.RESET}
 """
-version = 3.2
+version = 3.4
 nome_do_programa = "mac"
 
 # URL da página que contém informações sobre a versão mais recente
