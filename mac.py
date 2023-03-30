@@ -29,7 +29,7 @@ titulo = f"""{colorTexto.YELLOW}
 |____/ \___/|_|\__,_|\__\___|\___|
 {colorTexto.RESET}
 """
-version = 3.4
+version = 3.6
 nome_do_programa = "mac"
 
 # URL da página que contém informações sobre a versão mais recente
@@ -56,7 +56,10 @@ class Main:
 
         lista = []
         continuar = True
-        
+
+        def apiError():
+            print(f"Error: Houve um erro de conexão com a API\n")
+
         def caixaTexto(texto, cor = colorTexto.WHITE, tipoLinha = "-"):
             linhas = texto.splitlines()
             tamanho = max([len(linha) for linha in linhas])
@@ -66,6 +69,12 @@ class Main:
                 print(cor + "| " + linha.ljust(tamanho) + " |")
             print(cor + linha_superior + colorTexto.RESET)
 
+        def status(i):
+            if i:
+                print(f"\n-> Os CPE's válidos foram {colorTexto.RED}BLOQUEADOS{colorTexto.RESET}")
+            else:
+                print(f"\n-> Os CPE's válidos foram {colorTexto.LIGHTGREEN_EX}DESBLOQUEADOS{colorTexto.RESET}")
+        
         def license(block):
             try:
                 if block == True:
@@ -73,12 +82,7 @@ class Main:
                 elif block == False:
                     block = "false"
                 for i in range(len(lista)):
-                    payload = {
-
-                        'ids': lista[i],
-                        'block': block 
-                        
-                        }
+                    payload = {'ids': lista[i],'block': block}
                     response = requests.put(urlLicense, auth=(usuario, senha), json=payload)
                     saida = response.json().get("success", "Error")
 
@@ -92,8 +96,9 @@ class Main:
                     else:
                         saida = f'{colorTexto.RED}XX{colorTexto.RESET}'
                     print(f'CPE: {lista[i]} | {saida} | {codigo}')
+                     
             except:
-                print(f"Houve um erro de conexão com a API")
+                apiError()
                 return None
 
 
@@ -214,6 +219,7 @@ class Main:
                     caixaTexto("ERRO: NÃO EXISTE NENHUM MAC NA LISTA", colorTexto.RED, "=")
                 else:
                     os.system('cls') or None
+                    print(titulo)
                     for item in lista:
                         print(colorTexto.MAGENTA + item + "\n")
                     print (f"|Digite [{colorStyle.BRIGHT}0{colorStyle.NORMAL}] para {colorTexto.WHITE}VOLTAR{colorTexto.RESET} ao menu")
@@ -230,18 +236,24 @@ class Main:
                                 break
                             elif inp == "1":
                                 license(False)
-                                print(f"\n-> Os CPE's válidos foram {colorTexto.GREEN}DESBLOQUEADOS{colorTexto.RESET}")
-                                input("Aperte ENTER para voltar para o menu")
-                                os.system('cls') or None
-                                print(titulo)
-                                break
+                                status(False)
+                                try:
+                                    input("Aperte ENTER para voltar para o menu")
+                                    os.system('cls') or None
+                                    print(titulo)
+                                    break
+                                except:
+                                    apiError()
                             elif inp == "2":
                                 license(True)
-                                print(f"\n-> Os CPE's válidos foram {colorTexto.RED}BLOQUEADOS{colorTexto.RESET}")
-                                input("Aperte ENTER para voltar para o menu")
-                                os.system('cls') or None
-                                print(titulo)
-                                break
+                                status(True)
+                                try:
+                                    input("Aperte ENTER para voltar para o menu")
+                                    os.system('cls') or None
+                                    print(titulo)
+                                    break
+                                except :
+                                    apiError()
 
             elif len(numIn) < 12 or len(numIn) > 12:
                 caixaTexto("ERRO: O NÚMERO DIGITADO É INVÁLIDO", colorTexto.RED, "=")
