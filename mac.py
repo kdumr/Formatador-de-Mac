@@ -14,7 +14,7 @@ from tkinter import messagebox
 from prettytable import PrettyTable
 from pynput.keyboard import Key, Listener
 from conection import *
-from api import urlLicense, usuario, senha
+from api import urlLicense, urlInfoLicense, urlCreate, urlInfo, usuario, senha
 
 # Cria variável para cores
 colorama.init(autoreset=True)
@@ -29,7 +29,7 @@ titulo = f"""{colorTexto.YELLOW}
 |____/ \___/|_|\__,_|\__\___|\___|
 {colorTexto.RESET}
 """
-version = 3.6
+version = 3.7
 nome_do_programa = "mac"
 
 # URL da página que contém informações sobre a versão mais recente
@@ -75,6 +75,15 @@ class Main:
             else:
                 print(f"\n-> Os CPE's válidos foram {colorTexto.LIGHTGREEN_EX}DESBLOQUEADOS{colorTexto.RESET}")
         
+        def create():
+            try:
+                for i in range(len(cpeNotFound)):
+                    payloadCreate = {"content": {"mac_address": cpeNotFound[i], "pppoe_user": "glnk", "pppoe_password": "gigalinkinet!", "wifi_ssid": "Gigarouter", "wifi_password": "gigarouteractivation", "wifi_channel": "auto", "wifi_band": "auto", "wifi_mode": "11g"}}
+                    response = requests.put(urlCreate, auth=(usuario, senha), json=payloadCreate)
+                    response.json()
+            except:
+                apiError()
+                return None
         def license(block):
             try:
                 if block == True:
@@ -82,8 +91,8 @@ class Main:
                 elif block == False:
                     block = "false"
                 for i in range(len(lista)):
-                    payload = {'ids': lista[i],'block': block}
-                    response = requests.put(urlLicense, auth=(usuario, senha), json=payload)
+                    payloadLicense = {'ids': lista[i],'block': block}
+                    response = requests.put(urlLicense, auth=(usuario, senha), json=payloadLicense)
                     saida = response.json().get("success", "Error")
 
                     codigo = response.status_code
@@ -96,11 +105,9 @@ class Main:
                     else:
                         saida = f'{colorTexto.RED}XX{colorTexto.RESET}'
                     print(f'CPE: {lista[i]} | {saida} | {codigo}')
-                     
             except:
                 apiError()
                 return None
-
 
         def cancelar(key):
             if key == Key.home:
@@ -218,10 +225,51 @@ class Main:
                 if lista == []:
                     caixaTexto("ERRO: NÃO EXISTE NENHUM MAC NA LISTA", colorTexto.RED, "=")
                 else:
+                    cpeNotFound = []
+
                     os.system('cls') or None
                     print(titulo)
-                    for item in lista:
-                        print(colorTexto.MAGENTA + item + "\n")
+                    for i in range(len(lista)):
+                        payloadLicense = {'id': "0C:80:63:D8:56:64"}
+                        response = requests.get(f'{urlInfo}{lista[i]}', auth=(usuario, senha))
+                        responseLicense = requests.put(urlInfoLicense, auth=(usuario, senha), json=payloadLicense)
+                        saida = response.json().get("success")
+
+                        saidaLicense = responseLicense.json().get("status", saida)
+                        
+                        
+                        if saidaLicense == True:
+                            saidaLicense = f"{colorTexto.LIGHTGREEN_EX}Desbloqueado{colorTexto.RESET}"
+                        elif saidaLicense == False:
+                            saidaLicense = f"{colorTexto.RED}Bloqueado{colorTexto.RESET}"
+                        else:
+                            while saidaLicense not in [True, False]:
+                                print("Carregando...")
+                                responseLicense = requests.put(urlInfoLicense, auth=(usuario, senha), json=payloadLicense)
+                                saidaLicense = responseLicense.json().get("status")
+                                break
+                            if saidaLicense == True:
+                                saidaLicense = f"{colorTexto.LIGHTGREEN_EX}Desbloqueado{colorTexto.RESET}"
+                            elif saidaLicense == False:
+                                saidaLicense = f"{colorTexto.RED}Bloqueado{colorTexto.RESET}"
+
+
+                        codigo = response.status_code
+                        if codigo == 404:
+                            codigo = f"{colorTexto.LIGHTRED_EX}CPE não encontrado{colorTexto.RESET}"
+                            cpeNotFound.append(lista[i])
+                        elif codigo == 200:
+                            codigo = f"{colorTexto.LIGHTGREEN_EX}CPE encontrado{colorTexto.RESET} | Licença: {saidaLicense}"
+                        print(f'CPE: {lista[i]} | {codigo}')
+                    if len(cpeNotFound) > 0:
+                        print("Deseja criar um registro para os CPE's não encontrados?\n")
+                        print (f"|Digite [{colorStyle.BRIGHT}0{colorStyle.NORMAL}] para {colorTexto.LIGHTGREEN_EX}SIM{colorTexto.RESET}")
+                        print (f"|Digite [{colorStyle.BRIGHT}1{colorStyle.NORMAL}] para {colorTexto.RED}NÃO{colorTexto.RESET}")
+                        questIn = input("->")
+                        if questIn == "0":
+                            create()
+                            caixaTexto("Os registro para os CPE's não encontrados foram criados!", colorTexto.LIGHTGREEN_EX, "=")
+
                     print (f"|Digite [{colorStyle.BRIGHT}0{colorStyle.NORMAL}] para {colorTexto.WHITE}VOLTAR{colorTexto.RESET} ao menu")
                     print (f"|Digite [{colorStyle.BRIGHT}1{colorStyle.NORMAL}] para {colorTexto.GREEN}DESBLOQUEAR{colorTexto.RESET} os CPE's acima:")
                     print (f"|Digite [{colorStyle.BRIGHT}2{colorStyle.NORMAL}] para {colorTexto.RED}BLOQUEAR{colorTexto.RESET} os CPE's acima:")
