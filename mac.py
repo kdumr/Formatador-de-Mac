@@ -14,6 +14,7 @@ from tkinter import messagebox
 from prettytable import PrettyTable
 from pynput.keyboard import Key, Listener
 from conection import *
+from api import urlLicense, usuario, senha
 
 # Cria variável para cores
 colorama.init(autoreset=True)
@@ -55,6 +56,7 @@ class Main:
 
         lista = []
         continuar = True
+        
         def caixaTexto(texto, cor = colorTexto.WHITE, tipoLinha = "-"):
             linhas = texto.splitlines()
             tamanho = max([len(linha) for linha in linhas])
@@ -63,6 +65,37 @@ class Main:
             for linha in linhas:
                 print(cor + "| " + linha.ljust(tamanho) + " |")
             print(cor + linha_superior + colorTexto.RESET)
+
+        def license(block):
+            try:
+                if block == True:
+                    block = "true"
+                elif block == False:
+                    block = "false"
+                for i in range(len(lista)):
+                    payload = {
+
+                        'ids': lista[i],
+                        'block': block 
+                        
+                        }
+                    response = requests.put(urlLicense, auth=(usuario, senha), json=payload)
+                    saida = response.json().get("success", "Error")
+
+                    codigo = response.status_code
+                    if codigo == 500:
+                        codigo = f"{colorTexto.LIGHTRED_EX}CPE não encontrado{colorTexto.RESET}"
+                    elif codigo == 200:
+                        codigo = f"{colorTexto.LIGHTGREEN_EX}CPE encontrado{colorTexto.RESET}"
+                    if saida == True:
+                        saida = f'{colorTexto.LIGHTGREEN_EX}OK{colorTexto.RESET}'
+                    else:
+                        saida = f'{colorTexto.RED}XX{colorTexto.RESET}'
+                    print(f'CPE: {lista[i]} | {saida} | {codigo}')
+            except:
+                print(f"Houve um erro de conexão com a API")
+                return None
+
 
         def cancelar(key):
             if key == Key.home:
@@ -143,6 +176,7 @@ class Main:
             print(f"|Digite [{colorStyle.BRIGHT}1{colorStyle.NORMAL}] para {colorTexto.RED}DELETAR{colorTexto.RESET} os mac's:")
             print(f"|Digite [{colorStyle.BRIGHT}2{colorStyle.NORMAL}] para {colorTexto.LIGHTRED_EX}APAGAR{colorTexto.RESET} o último mac:")
             print(f"|Digite [{colorStyle.BRIGHT}3{colorStyle.NORMAL}] para {colorTexto.MAGENTA}LISTAR{colorTexto.RESET} os mac's copiados:")
+            print(f"|Digite [{colorStyle.BRIGHT}4{colorStyle.NORMAL}] para {colorTexto.LIGHTYELLOW_EX}ALTERAR{colorTexto.RESET} o status da licença dos CPE's")
             print(f"|MACS Registrados: {colorTexto.CYAN}{len(lista)}{colorTexto.RESET}")
             numInnoReplace = input("|Digite o mac:\n-> ")
             numIn = numInnoReplace.replace(":", "")
@@ -175,6 +209,40 @@ class Main:
                     caixaTexto((" " * 10 + "LISTA DE MAC'S COPIADOS" + " " * 10), colorTexto.MAGENTA)
                     for item in lista:
                         print(colorTexto.MAGENTA + item + "\n")
+            elif numIn == "4":
+                if lista == []:
+                    caixaTexto("ERRO: NÃO EXISTE NENHUM MAC NA LISTA", colorTexto.RED, "=")
+                else:
+                    os.system('cls') or None
+                    for item in lista:
+                        print(colorTexto.MAGENTA + item + "\n")
+                    print (f"|Digite [{colorStyle.BRIGHT}0{colorStyle.NORMAL}] para {colorTexto.WHITE}VOLTAR{colorTexto.RESET} ao menu")
+                    print (f"|Digite [{colorStyle.BRIGHT}1{colorStyle.NORMAL}] para {colorTexto.GREEN}DESBLOQUEAR{colorTexto.RESET} os CPE's acima:")
+                    print (f"|Digite [{colorStyle.BRIGHT}2{colorStyle.NORMAL}] para {colorTexto.RED}BLOQUEAR{colorTexto.RESET} os CPE's acima:")
+                    while True:
+                        inp = input("->")
+                        if inp != "0" and inp != "1" and inp != "2":
+                            caixaTexto("ERRO: OPÇÃO INVÁLIDA", colorTexto.RED, "=")
+                        else:
+                            if inp == "0":
+                                os.system('cls') or None
+                                print(titulo)
+                                break
+                            elif inp == "1":
+                                license(False)
+                                print(f"\n-> Os CPE's válidos foram {colorTexto.GREEN}DESBLOQUEADOS{colorTexto.RESET}")
+                                input("Aperte ENTER para voltar para o menu")
+                                os.system('cls') or None
+                                print(titulo)
+                                break
+                            elif inp == "2":
+                                license(True)
+                                print(f"\n-> Os CPE's válidos foram {colorTexto.RED}BLOQUEADOS{colorTexto.RESET}")
+                                input("Aperte ENTER para voltar para o menu")
+                                os.system('cls') or None
+                                print(titulo)
+                                break
+
             elif len(numIn) < 12 or len(numIn) > 12:
                 caixaTexto("ERRO: O NÚMERO DIGITADO É INVÁLIDO", colorTexto.RED, "=")
             elif numIn == "info":
@@ -192,6 +260,7 @@ class Main:
                     caixaTexto(f"MAC: {mac}")
                     print("")
                     lista.append(mac)
+            
 
 if __name__ == "__main__":
     try:
