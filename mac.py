@@ -29,7 +29,7 @@ titulo = f"""{colorTexto.YELLOW}
 |____/ \___/|_|\__,_|\__\___|\___|
 {colorTexto.RESET}
 """
-version = 3.7
+version = 3.8
 nome_do_programa = "mac"
 
 # URL da página que contém informações sobre a versão mais recente
@@ -71,9 +71,10 @@ class Main:
 
         def status(i):
             if i:
-                print(f"\n-> Os CPE's válidos foram {colorTexto.RED}BLOQUEADOS{colorTexto.RESET}")
+                caixaTexto(("X" * 5 + f" Os CPE's válidos foram BLOQUEADOS " + "X" * 5), colorTexto.LIGHTRED_EX)
+
             else:
-                print(f"\n-> Os CPE's válidos foram {colorTexto.LIGHTGREEN_EX}DESBLOQUEADOS{colorTexto.RESET}")
+                caixaTexto(("|" * 5 + f" Os CPE's válidos foram DESBLOQUEADOS " + "|" * 5), colorTexto.LIGHTGREEN_EX)
         
         def create():
             try:
@@ -90,21 +91,20 @@ class Main:
                     block = "true"
                 elif block == False:
                     block = "false"
-                for i in range(len(lista)):
-                    payloadLicense = {'ids': lista[i],'block': block}
-                    response = requests.put(urlLicense, auth=(usuario, senha), json=payloadLicense)
-                    saida = response.json().get("success", "Error")
 
-                    codigo = response.status_code
-                    if codigo == 500:
-                        codigo = f"{colorTexto.LIGHTRED_EX}CPE não encontrado{colorTexto.RESET}"
-                    elif codigo == 200:
-                        codigo = f"{colorTexto.LIGHTGREEN_EX}CPE encontrado{colorTexto.RESET}"
-                    if saida == True:
-                        saida = f'{colorTexto.LIGHTGREEN_EX}OK{colorTexto.RESET}'
-                    else:
-                        saida = f'{colorTexto.RED}XX{colorTexto.RESET}'
-                    print(f'CPE: {lista[i]} | {saida} | {codigo}')
+                payloadLicense = {'ids': lista,'block': block}
+                response = requests.put(urlLicense, auth=(usuario, senha), json=payloadLicense)
+                saida = response.json().get("success", "Error")
+
+                codigo = response.status_code
+                if codigo == 500:
+                    codigo = f"{colorTexto.LIGHTRED_EX}CPE não encontrado{colorTexto.RESET}"
+                elif codigo == 200:
+                    codigo = f"{colorTexto.LIGHTGREEN_EX}CPE encontrado{colorTexto.RESET}"
+                if saida == True:
+                    saida = f'{colorTexto.LIGHTGREEN_EX}OK{colorTexto.RESET}'
+                else:
+                    saida = f'{colorTexto.RED}XX{colorTexto.RESET}'
             except:
                 apiError()
                 return None
@@ -230,29 +230,22 @@ class Main:
                     os.system('cls') or None
                     print(titulo)
                     for i in range(len(lista)):
-                        payloadLicense = {'id': "0C:80:63:D8:56:64"}
+                        payloadLicense = {'id': lista[i]}
                         response = requests.get(f'{urlInfo}{lista[i]}', auth=(usuario, senha))
                         responseLicense = requests.put(urlInfoLicense, auth=(usuario, senha), json=payloadLicense)
-                        saida = response.json().get("success")
 
-                        saidaLicense = responseLicense.json().get("status", saida)
-                        
+                        saidaLicense = responseLicense.json().get("status")
                         
                         if saidaLicense == True:
                             saidaLicense = f"{colorTexto.LIGHTGREEN_EX}Desbloqueado{colorTexto.RESET}"
                         elif saidaLicense == False:
                             saidaLicense = f"{colorTexto.RED}Bloqueado{colorTexto.RESET}"
                         else:
-                            while saidaLicense not in [True, False]:
-                                print("Carregando...")
-                                responseLicense = requests.put(urlInfoLicense, auth=(usuario, senha), json=payloadLicense)
-                                saidaLicense = responseLicense.json().get("status")
-                                break
-                            if saidaLicense == True:
-                                saidaLicense = f"{colorTexto.LIGHTGREEN_EX}Desbloqueado{colorTexto.RESET}"
-                            elif saidaLicense == False:
-                                saidaLicense = f"{colorTexto.RED}Bloqueado{colorTexto.RESET}"
-
+                            if responseLicense.json().get("success") == False:
+                                saidaLicense = f"{colorTexto.LIGHTRED_EX}Não encontrada{colorTexto.RESET}"
+                            else:
+                                saidaLicense = f'{responseLicense.json().get("message")} | COD: {responseLicense.status_code}'
+                                
 
                         codigo = response.status_code
                         if codigo == 404:
@@ -269,6 +262,30 @@ class Main:
                         if questIn == "0":
                             create()
                             caixaTexto("Os registro para os CPE's não encontrados foram criados!", colorTexto.LIGHTGREEN_EX, "=")
+                            for i in range(len(lista)):
+                                payloadLicense = {'id': lista[i]}
+                                response = requests.get(f'{urlInfo}{lista[i]}', auth=(usuario, senha))
+                                responseLicense = requests.put(urlInfoLicense, auth=(usuario, senha), json=payloadLicense)
+
+                                saidaLicense = responseLicense.json().get("status")
+                                
+                                if saidaLicense == True:
+                                    saidaLicense = f"{colorTexto.LIGHTGREEN_EX}Desbloqueado{colorTexto.RESET}"
+                                elif saidaLicense == False:
+                                    saidaLicense = f"{colorTexto.RED}Bloqueado{colorTexto.RESET}"
+                                else:
+                                    if responseLicense.json().get("success") == False:
+                                        saidaLicense = f"{colorTexto.LIGHTRED_EX}Não encontrada{colorTexto.RESET}"
+                                    else:
+                                        saidaLicense = f'{responseLicense.json().get("message")} | COD: {responseLicense.status_code}'
+                                
+                                codigo = response.status_code
+                                if codigo == 404:
+                                    codigo = f"{colorTexto.LIGHTRED_EX}CPE não encontrado{colorTexto.RESET}"
+                                    cpeNotFound.append(lista[i])
+                                elif codigo == 200:
+                                    codigo = f"{colorTexto.LIGHTGREEN_EX}CPE encontrado{colorTexto.RESET} | Licença: {saidaLicense}"
+                                print(f'CPE: {lista[i]} | {codigo}')
 
                     print (f"|Digite [{colorStyle.BRIGHT}0{colorStyle.NORMAL}] para {colorTexto.WHITE}VOLTAR{colorTexto.RESET} ao menu")
                     print (f"|Digite [{colorStyle.BRIGHT}1{colorStyle.NORMAL}] para {colorTexto.GREEN}DESBLOQUEAR{colorTexto.RESET} os CPE's acima:")
